@@ -1,0 +1,15 @@
+# Environment variables and local secrets
+.env
+.env.*
+!.env.example
+
+# Dependency and build folders (used when the app is upgraded to React + Node)
+node_modules/
+dist/
+coverage/
+trackly.db
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.vscode/
