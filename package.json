@@ -4,9 +4,14 @@
   "description": "Smart Job and Internship Tracker",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test *.test.cjs"
   },
   "engines": {
-    "node": ">=24"
+    "node": "24.x"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.18.0"
   }
 }
+
