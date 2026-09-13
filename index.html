@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trackly — Job Application Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="pages.css" />
+    <link rel="stylesheet" href="tasks.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="index.html"><span>✦</span> Trackly</a>
+        <nav class="site-nav" aria-label="Main navigation"><a class="nav-link active" href="index.html">Dashboard</a><a class="nav-link" href="insights.html">Insights</a><a class="nav-link" href="prep.html">Interview Prep</a><a class="nav-link" href="scanner.html">Resume Scanner</a></nav>
+        <div class="account-actions"><span id="user-name" hidden></span><button class="text-button" id="logout-button" hidden>Log out</button><button class="primary-button" id="open-modal">+ Add application</button></div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="eyebrow">YOUR CAREER COMMAND CENTER</p>
+          <h1>Keep every opportunity<br /><em>moving forward.</em></h1>
+          <p class="hero-copy">A focused place to organize applications, prepare for interviews, and land your next role.</p>
+        </div>
+        <div class="goal-card">
+          <span class="goal-icon">◎</span>
+          <div><strong id="goal-progress">0 of 10</strong><span>Applications goal</span></div>
+          <div class="progress-track"><div id="goal-bar"></div></div>
+        </div>
+      </section>
+
+      <section class="stats" aria-label="Application statistics">
+        <article><span>Total applications</span><strong id="total-count">0</strong><small>All tracked roles</small></article>
+        <article><span>In progress</span><strong id="progress-count">0</strong><small>Applied + interviewing</small></article>
+        <article><span>Interviews</span><strong id="interview-count">0</strong><small>Great work — keep going!</small></article>
+        <article><span>Response rate</span><strong id="response-rate">0%</strong><small>Interviews + offers</small></article>
+      </section>
+
+      <section class="action-center">
+        <div class="section-heading"><div><h2>Action Center</h2><p>Your next career tasks, all in one place.</p></div><button class="secondary-button" id="open-task-modal">+ Add task</button></div>
+        <div class="task-list" id="task-list"></div>
+      </section>
+
+      <section class="applications-section">
+        <div class="section-heading">
+          <div><h2>Applications</h2><p>Stay on top of every next step.</p></div>
+          <div class="filters" role="group" aria-label="Filter applications">
+            <button class="filter active" data-filter="All">All</button>
+            <button class="filter" data-filter="Applied">Applied</button>
+            <button class="filter" data-filter="Interview">Interview</button>
+            <button class="filter" data-filter="Offer">Offer</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Company & role</th><th>Status</th><th>Applied on</th><th>Next step</th><th></th></tr></thead>
+            <tbody id="application-list"></tbody>
+          </table>
+          <div class="empty-state" id="empty-state" hidden>
+            <div>✦</div><h3>No applications here yet</h3><p>Add your first role and start building momentum.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="application-modal">
+      <form id="application-form" method="dialog">
+        <div class="modal-heading"><div><p class="eyebrow">NEW OPPORTUNITY</p><h2>Add an application</h2></div><button class="close-button" type="button" id="close-modal" aria-label="Close">×</button></div>
+        <label>Company<input name="company" placeholder="e.g. Microsoft" required maxlength="60" /></label>
+        <label>Role<input name="role" placeholder="e.g. Software Engineer Intern" required maxlength="80" /></label>
+        <div class="form-grid"><label>Status<select name="status"><option>Applied</option><option>Interview</option><option>Offer</option><option>Rejected</option></select></label><label>Applied on<input name="date" type="date" required /></label></div>
+        <label>Next step <input name="nextStep" placeholder="e.g. Complete coding assessment" maxlength="100" /></label>
+        <button class="primary-button submit-button" id="application-submit" type="submit">Save application</button>
+      </form>
+    </dialog>
+    <dialog id="task-modal">
+      <form id="task-form">
+        <div class="modal-heading"><div><p class="eyebrow">NEW TASK</p><h2>Add an action</h2></div><button class="close-button" type="button" id="close-task-modal" aria-label="Close">×</button></div>
+        <label>Task<input name="title" placeholder="e.g. Complete Microsoft coding test" required maxlength="120" /></label>
+        <label>Due date<input name="dueDate" type="date" /></label>
+        <button class="primary-button submit-button" type="submit">Save task</button>
+      </form>
+    </dialog>
+    <dialog id="auth-modal" class="auth-modal">
+      <form id="auth-form">
+        <p class="eyebrow">WELCOME TO TRACKLY</p>
+        <h2 id="auth-title">Create your account</h2>
+        <p class="auth-copy" id="auth-copy">Start organizing your job search in one focused place.</p>
+        <label id="name-field">Your name<input name="name" placeholder="e.g. Priya Sharma" maxlength="50" /></label>
+        <label>Email<input name="email" type="email" placeholder="you@example.com" required /></label>
+        <label>Password<input name="password" type="password" placeholder="At least 8 characters" minlength="8" required /></label>
+        <p class="form-error" id="auth-error" role="alert"></p>
+        <button class="primary-button submit-button" id="auth-submit" type="submit">Create account</button>
+        <button class="auth-switch" type="button" id="auth-switch">Already have an account? Log in</button>
+      </form>
+    </dialog>
+    <script src="app.js"></script>
+  </body>
+</html>
