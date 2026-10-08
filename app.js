@@ -2,6 +2,10 @@ let applications = [];
 let activeFilter = 'All';
 let authMode = 'register';
 let editingId = null;
+
+// Variables for Action Center tasks
+let editingTaskId = null;
+let tasks = [];
 const $ = selector => document.querySelector(selector);
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#039;', '"':'&quot;' }[char]));
 const api = async (url, options = {}) => {
@@ -26,8 +30,13 @@ function render() {
   $('#goal-bar').style.width = `${Math.min((applications.length / 30) * 100, 100)}%`;
 }
 async function loadApplications() { applications = (await api('/api/applications')).applications; render(); }
-function renderTasks(tasks) { $('#task-list').innerHTML = tasks.length ? tasks.map(task => `<article class="task ${task.completed ? 'done' : ''}"><button class="task-check" data-task-id="${task.id}" data-completed="${task.completed ? '0' : '1'}">${task.completed ? '✓' : ''}</button><div><strong>${escapeHtml(task.title)}</strong><span>${task.dueDate ? `Due ${prettyDate(task.dueDate)}` : 'No due date'}</span></div><button class="task-delete" data-task-delete="${task.id}" title="Delete task">×</button></article>`).join('') : '<p class="task-empty">No actions yet. Add a follow-up, coding test, or interview task.</p>'; }
-async function loadTasks() { renderTasks((await api('/api/tasks')).tasks); }
+function renderTasks(tasks) { $('#task-list').innerHTML = tasks.length ? tasks.map(task => `<article class="task ${task.completed ? 'done' : ''}"><button class="task-check" data-task-id="${task.id}" data-completed="${task.completed ? '0' : '1'}">${task.completed ? '✓' : ''}</button><div><strong>${escapeHtml(task.title)}</strong><span>${task.dueDate ? `Due ${prettyDate(task.dueDate)}` : 'No due date'}</span></div> <button class="task-edit"
+  data-task-edit="${task.id}"
+  title="Edit task">Edit</button><button class="task-delete" data-task-delete="${task.id}" title="Delete task">×</button></article>`).join('') : '<p class="task-empty">No actions yet. Add a follow-up, coding test, or interview task.</p>'; }
+async function loadTasks() {
+  tasks = (await api('/api/tasks')).tasks;
+  renderTasks(tasks);
+}
 function configureAuth(mode) {
   authMode = mode; const registering = mode === 'register';
   $('#auth-title').textContent = registering ? 'Create your account' : 'Welcome back';
@@ -47,7 +56,43 @@ $('#auth-form').onsubmit = async event => { event.preventDefault(); $('#auth-err
 $('#application-form').onsubmit = async event => { event.preventDefault(); try { await api(editingId ? `/api/applications/${editingId}` : '/api/applications', { method: editingId ? 'PATCH' : 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }); $('#application-modal').close(); await loadApplications(); } catch (error) { alert(error.message); } };
 $('#application-list').onclick = async event => { const editId = event.target.dataset.editId; const id = event.target.dataset.id; if (editId) return openApplicationForm(applications.find(item => item.id === Number(editId))); if (id && confirm('Delete this application?')) { await api(`/api/applications/${id}`, { method: 'DELETE' }); await loadApplications(); } };
 $('#task-form').onsubmit = async event => { event.preventDefault(); try { await api('/api/tasks', { method: 'POST', body: JSON.stringify(Object.fromEntries(new FormData(event.target))) }); $('#task-modal').close(); await loadTasks(); } catch (error) { alert(error.message); } };
-$('#task-list').onclick = async event => { const id = event.target.dataset.taskId; const deleteId = event.target.dataset.taskDelete; if (id) { await api(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ completed: event.target.dataset.completed === '1' }) }); await loadTasks(); } if (deleteId) { await api(`/api/tasks/${deleteId}`, { method: 'DELETE' }); await loadTasks(); } };
+$('#task-list').onclick = async event => {
+  const id = event.target.dataset.taskId;
+  const deleteId = event.target.dataset.taskDelete;
+  const editId = event.target.dataset.taskEdit;
+
+  if (editId) {
+    const task = tasks.find(item => item.id === Number(editId));
+
+    if (!task) return;
+
+    editingTaskId = task.id;
+
+    const form = $('#task-form');
+    form.elements.namedItem('title').value = task.title;
+    form.elements.namedItem('dueDate').value = task.dueDate || '';
+
+    $('#task-modal').showModal();
+    return;
+  }
+
+  if (id) {
+    await api(`/api/tasks/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({
+        completed: event.target.dataset.completed === '1'
+      })
+    });
+    await loadTasks();
+  }
+
+  if (deleteId) {
+    await api(`/api/tasks/${deleteId}`, {
+      method: 'DELETE'
+    });
+    await loadTasks();
+  }
+};
 $('#logout-button').onclick = async () => { await api('/api/auth/logout', { method: 'POST' }); applications = []; render(); $('#user-name').hidden = true; $('#logout-button').hidden = true; configureAuth('login'); $('#auth-modal').showModal(); };
 document.querySelectorAll('.filter').forEach(button => button.onclick = () => { activeFilter = button.dataset.filter; document.querySelector('.filter.active').classList.remove('active'); button.classList.add('active'); render(); });
 boot();
